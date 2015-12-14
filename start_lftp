@@ -1,0 +1,127 @@
+#!/bin/bash
+
+##################################################################
+# Author       : Sinesio Bittencourt
+# Email        : contato@sinesio.com.br
+# Info         : copiar arquivos via LFTP
+# Version      : 0.1 ( beta )
+# Contributors : Percio Andrade 
+# Project      : http://git.sinesio.com.br
+#
+# CHANGELOG
+# 29/07/15 - PA: Correção de variaveis
+# 02/08/15 - PA: Adicionada verificacoes de conexao, adicionado email, contagem de arquivos adicionados, relatorios adicionados
+#
+# TO-DO #
+# Add uma array para guardar varias conta de ftp e baixar ao mesmo tempo. array=("valorFTP 1" "valorFTP 2" "valorFTP 3")
+# Add opção para baixar banco de dados
+# Add email ao finalizar o processo
+# Fazer o script rodar em segundo plano. nohup SCRIPT_LFTP &
+##################################################################
+VERSAO="0.1b"
+
+clear
+
+printf "
+# Author       : Sinesio Bittencourt
+# Email        : contato@sinesio.com.br
+# Info         : copiar arquivos via LFTP
+# Version      : v$VERSAO ( beta )
+
+"
+
+echo -e "\n[!] - Bem vindo Gator.\n"
+
+read -p "FTP da origem ftp : "		FTP
+read -p "Informe o USUARIO : "		USER
+read -p "Informe a SENHA   : "		SENHA
+read -p "Informe o dominio : " 		DOMINIO
+
+EMAIL="lista.migracao@hostgator.com.br"
+echo -e "\n"
+
+# CHECA SE EXISTE O LFTP NA MAQUINA
+if [[ ! -e "/usr/bin/lftp" ]]
+then
+	read -p "[+] - O aplicativo lftp nao existe no servidor, deseja instalar ? [s/n]" LFTP
+	if [[ $LFTP == "s" ]]
+	then
+		echo "[+] - Instalando o lftp"
+		yum install -y lftp
+		echo "[+] - Aplicativo lftp instalado com sucesso."
+	elif [[ $LFTP == "n" ]]
+	then
+		echo "[+] - O script somente funciona com lftp, finalizando!"
+		exit
+	else
+		echo "[+] - O aplicativo lftp ja existe no servidor, continuando."
+	fi
+fi
+
+# CHECA SE O ARQUIVO DE STATUS EXISTE
+if [[ -e status.txt ]]
+then
+	echo "[!] - Arquivos de status localizado, removendo"
+	rm -rf status.txt
+fi
+
+# CHECA SE OS VALORES FORAM INSERIDOS CORREETAMENTE
+if [[ -z $FTP ]]||[[ -z $USER ]]||[[ -z $SENHA ]]
+then
+       	echo -e "[!] - Nenhum valor pode ficar em branco, por favor tente novamente."
+	exit
+else
+	echo "[+] - Conectando ao FTP"
+
+# TESTA A CONEXAO DO SERVIDOR FTP
+lftp -u $USER,$SENHA $FTP -e "ls;exit" 2>status.txt > /dev/null
+STATUS_FTP=$(egrep -o "Not connected|530|No address|Name or service not known|No address associated with hostname" status.txt | head -1)
+
+	if [[ $STATUS_FTP == 530 ]]||[[ $STATUS_FTP == "Name or service not known" ]]||[[ $STATUS_FTP == " No address associated with hostname" ]]
+	then
+		echo "[!] - Nao foi possivel conectar ao FTP. Verifique os dados inseridos e tente novamente."
+       		echo "[!] - Removendo relatorio"
+		rm -rf status.txt
+		exit
+	fi
+fi
+
+# CASO CONECTADO CONTINUA
+echo "[+] - Conectado"
+	echo "[!] - Obtendo informacoes. Por favor aguarde..."
+	# RELATORIO DE TOTAL DE ARQUIVOS
+	CONTA_FTP=$(lftp -u $USER,$SENHA $FTP -e "ls -RH|wc -l;exit"|awk '{print $1}')
+	# RELATORIO DE ARQUIVOS E DIRETORIOS
+	RELATORIO_FTP=$(lftp -u $USER,$SENHA $FTP -e "ls -RH;exit" > `pwd`/relatorio_ftp_.txt)
+	# NOME DO USUARIO DE DIRETORIO
+	DIR_FTP=$(awk '{print $3}' relatorio_ftp_.txt|head -1)
+        echo "[+] - O total de arquivos a serem transferidos do usuario $DIR_FTP e de $CONTA_FTP"
+        echo "[+] - Um relatorio foi gerado dos arquivos a serem transferidos"
+        echo "[!] - Relatorio gerado e salvo em `pwd`/relatorio_ftp_.txt"
+	echo "[!] - Criando o diretorio onde os arquivos ficarao localizados"
+
+# INICIA A FUNCAO DE TRANSFERENCIA
+function INICIA_FTP(){
+lftp -d -u $USER,$SENHA -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c / ./ ; quit' ftp://$FTP;
+}
+
+# CRIA O DIRETORIO QUE VAI RECEBER OS ARQUIVOS
+if [[ ! -e "`pwd`/migrar-$DOMINIO" ]]
+then
+	mkdir `pwd`/migrar-$DOMINIO
+	echo "[+] - Diretorio migrar-$DOMINIO criado em `pwd`/migrar-$DOMINIO"
+	echo "[+] - Acessando diretorio que recebera arquivos localizado em `pwd`/migrar-$DOMINIO"
+	cd `pwd`/migrar-$DOMINIO
+        echo "[+] - Iniciando a transferencia de arquivos do usuario $DIR_FTP do FTP $FTP em dentro de 5 segundos"
+	echo -e "\nPressione control+C para caso queira cancelar\n"
+        sleep 5
+        INICIA_FTP
+else
+	echo "[!] - O diretorio de migracao `pwd`/migrar-$DOMINIO ja existe, resumindo"
+	echo "[+] - Acessando diretorio que recebera arquivos localizado em `pwd`/migrar-$DOMINIO"
+	cd `pwd`/migrar-$DOMINIO
+	echo "[+] - Iniciando a transferencia de arquivos do usuario $DIR_FTP do FTP $FTP em dentro de 5 segundos"
+	echo -e "\nPressione control+C para caso queira cancelar\n"
+	sleep 5
+	INICIA_FTP
+fi
