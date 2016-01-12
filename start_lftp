@@ -22,6 +22,10 @@ VERSAO="0.1b"
 
 clear
 
+# OLD_SCRIPT
+#lftp -d -u $USER,'$SENHA' -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c . ./ ; quit' ftp://$FTP; perms
+
+
 printf "
 # Author       : Sinesio Bittencourt
 # Email        : contato@sinesio.com.br
