@@ -25,6 +25,9 @@ clear
 # OLD_SCRIPT
 #lftp -d -u $USER,'$SENHA' -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c . ./ ; quit' ftp://$FTP; perms
 
+#Test ports:
+#root@wizard:~$ lftp -p PORTA ( 1891 or 22 or 21 ) -u USER,SENHA DOMINIO/FTP
+
 
 printf "
 # Author       : Sinesio Bittencourt
