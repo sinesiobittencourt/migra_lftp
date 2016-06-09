@@ -39,7 +39,7 @@ echo -e "\n[!] - Bem vindo Gator.\n"
 read -p "FTP da origem ftp : "		FTP
 read -p "Informe o USUARIO : "		USER
 read -p "Informe a SENHA   : "		SENHA
-read -p "Informe a numero da porta : "	PORTA
+read -p "Informe a numero da porta : "		PORTA
 read -p "Informe o dominio : " 		DOMINIO
 
 EMAIL="lista.migracao@hostgator.com.br"
