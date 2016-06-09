@@ -42,7 +42,7 @@ echo -e "\n[!] - Bem vindo Gator.\n"
 read -p "FTP da origem ftp : "		FTP
 read -p "Informe o USUARIO : "		USER
 read -p "Informe a SENHA   : "		SENHA
-read -p "Informe a numero da porta : "		PORTA
+#read -p "Informe a numero da porta : "		PORTA
 read -p "Informe o dominio : " 		DOMINIO
 
 EMAIL="lista.migracao@hostgator.com.br"
@@ -74,7 +74,7 @@ then
 fi
 
 # CHECA SE OS VALORES FORAM INSERIDOS CORREETAMENTE
-if [[ -z $FTP ]]||[[ -z $USER ]]||[[ -z $SENHA ]] || [[ -z $PORTA ]]
+if [[ -z $FTP ]]||[[ -z $USER ]]||[[ -z $SENHA ]]
 then
        	echo -e "[!] - Nenhum valor pode ficar em branco, por favor tente novamente."
 	exit
@@ -82,7 +82,7 @@ else
 	echo "[+] - Conectando ao FTP"
 
 # TESTA A CONEXAO DO SERVIDOR FTP
-lftp -p $PORTA -u $USER,$SENHA $FTP -e "ls;exit" 2>status.txt > /dev/null
+lftp  -u $USER,$SENHA $FTP -e "ls;exit" 2>status.txt > /dev/null
 STATUS_FTP=$(egrep -o "Not connected|530|No address|Name or service not known|No address associated with hostname" status.txt | head -1)
 
 	if [[ $STATUS_FTP == 530 ]]||[[ $STATUS_FTP == "Name or service not known" ]]||[[ $STATUS_FTP == " No address associated with hostname" ]]
@@ -98,9 +98,9 @@ fi
 echo "[+] - Conectado"
 	echo "[!] - Obtendo informacoes. Por favor aguarde..."
 	# RELATORIO DE TOTAL DE ARQUIVOS
-	CONTA_FTP=$(lftp -p $PORTA -u $USER,$SENHA $FTP -e "ls -RH|wc -l;exit"|awk '{print $1}')
+	CONTA_FTP=$(lftp  -u $USER,$SENHA $FTP -e "ls -RH|wc -l;exit"|awk '{print $1}')
 	# RELATORIO DE ARQUIVOS E DIRETORIOS
-	RELATORIO_FTP=$(lftp -p $PORTA -u $USER,$SENHA $FTP -e "ls -RH;exit" > `pwd`/relatorio_ftp_.txt)
+	RELATORIO_FTP=$(lftp  -u $USER,$SENHA $FTP -e "ls -RH;exit" > `pwd`/relatorio_ftp_.txt)
 	# NOME DO USUARIO DE DIRETORIO
 	DIR_FTP=$(awk '{print $3}' relatorio_ftp_.txt|head -1)
         echo "[+] - O total de arquivos a serem transferidos do usuario $DIR_FTP e de $CONTA_FTP"
@@ -110,7 +110,7 @@ echo "[+] - Conectado"
 
 # INICIA A FUNCAO DE TRANSFERENCIA
 function INICIA_FTP(){
-lftp -p $PORTA -d -u $USER,$SENHA -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c / ./ ; quit' ftp://$FTP;
+lftp  -d -u $USER,$SENHA -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c / ./ ; quit' ftp://$FTP;
 }
 
 # CRIA O DIRETORIO QUE VAI RECEBER OS ARQUIVOS
