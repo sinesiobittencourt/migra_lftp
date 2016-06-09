@@ -110,7 +110,7 @@ echo "[+] - Conectado"
 
 # INICIA A FUNCAO DE TRANSFERENCIA
 function INICIA_FTP(){
-lftp -d -u $USER,$SENHA -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c / ./ ; quit' ftp://$FTP;
+lftp -p $PORTA -d -u $USER,$SENHA -e 'set ftp:list-options -a ; set ftp:use-fxp true ; set ftp:fxp-passive-source true ; set ftp:ssl-allow no ; set mirror:parallel-directories on ; set mirror:parallel-transfer-count 5 ; mirror -c / ./ ; quit' ftp://$FTP;
 }
 
 # CRIA O DIRETORIO QUE VAI RECEBER OS ARQUIVOS
