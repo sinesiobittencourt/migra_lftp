@@ -45,7 +45,7 @@ read -p "Informe a SENHA   : "		SENHA
 #read -p "Informe a numero da porta : "		PORTA
 read -p "Informe o dominio : " 		DOMINIO
 
-EMAIL="lista.migracao@hostgator.com.br"
+
 echo -e "\n"
 
 # CHECA SE EXISTE O LFTP NA MAQUINA
