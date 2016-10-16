@@ -5,12 +5,13 @@ Efetuar migração via SHELL com LFTP
 bash <(GET https://raw.githubusercontent.com/sinesiobittencourt/migra_lftp/master/start_lftp)
 
 ** Preencha os dados solicitados 
-# Version      : v0.1b ( beta )
+
 [!] - Bem vindo Gator.
 
-FTP da origem ftp : 
-Informe o USUARIO : 
-Informe a SENHA   : 
-Informe o dominio : 
+FTP da origem ftp :
+Informe o USUARIO :
+Informe a SENHA   :
+Informe o dominio :
+
 
 
