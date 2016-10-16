@@ -9,8 +9,11 @@ bash <(GET https://raw.githubusercontent.com/sinesiobittencourt/migra_lftp/maste
 [!] - Bem vindo Gator.
 
 FTP da origem ftp :
+
 Informe o USUARIO :
+
 Informe a SENHA   :
+
 Informe o dominio :
 
 
